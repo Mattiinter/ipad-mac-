@@ -1,12 +1,12 @@
-name: Mac_iPad_Soluzione_Vera
+name: Mac_iPad_Funzionante
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Configura Accesso Diretto
+      - name: 1. Creazione Utente e Attivazione Desktop
         run: |
-          # Crea un nuovo utente amministratore chiamato 'ipad' con password '1234'
+          # Crea un nuovo utente 'ipad' con password '1234'
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
           sudo dscl . -create /Users/ipad RealName "iPad User"
@@ -16,10 +16,11 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Attiva il desktop remoto per tutti
+          # Attiva il desktop remoto per tutti gli utenti
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
 
       - name: 2. Avvio Tunnel Bore
         run: |
           brew install bore-cli
+          # Avvia il tunnel sulla porta 5900
           bore local 5900 --to bore.pub
