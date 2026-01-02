@@ -2,14 +2,16 @@ name: Mac_iPad
 on: workflow_dispatch
 jobs:
   run-mac:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
-      - name: Setup e Avvio
+      - name: Setup
         run: |
           brew install --cask ngrok
           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
           sudo dscl . -passwd /Users/runner "Password123!"
+          # Avvia il tunnel in background senza bloccare il sistema
           (ngrok tcp 5900 &)
+          # Attiva il desktop remoto
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all
+          # Mantiene il server acceso per 6 ore
           sleep 21600
-
