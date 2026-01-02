@@ -1,25 +1,15 @@
-name: Mac_iPad_Definitivo
+name: Mac_iPad_VNC
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Attiva Desktop Remoto
+      - name: 1. Attiva Desktop
         run: |
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
       
-      - name: 2. Genera Password per il Tunnel
+      - name: 2. Avvio Tunnel Bore
         run: |
-          echo "------------------------------------------"
-          echo "LA TUA TUNNEL PASSWORD (IP) E':"
-          curl https://loca.lt/mytunnelpassword
-          echo ""
-          echo "------------------------------------------"
-
-      - name: 3. Avvio Localtunnel
-        run: |
-          npm install -g localtunnel
-          # Avvio del tunnel sulla porta 5900 (VNC)
-          lt --port 5900 &
-          # Mantiene il server acceso per 6 ore
-          sleep 21600
+          brew install bore-cli
+          # Crea un tunnel diretto per il VNC (porta 5900)
+          bore local 5900 --to bore.pub
