@@ -2,7 +2,7 @@ name: Mac_iPad
 on: workflow_dispatch
 jobs:
   run-mac:
-    runs-on: macos-12
+    runs-on: macos-latest
     steps:
       - name: Start
         run: |
