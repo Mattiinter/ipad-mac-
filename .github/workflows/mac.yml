@@ -4,14 +4,15 @@ jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: Setup
+      - name: Setup Ngrok
         run: |
           brew install --cask ngrok
           ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-          sudo dscl . -passwd /Users/runner "Password123!"
-          # Avvia il tunnel in background senza bloccare il sistema
-          (ngrok tcp 5900 &)
-          # Attiva il desktop remoto
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all
-          # Mantiene il server acceso per 6 ore
-          sleep 21600
+      - name: Attiva VNC senza password
+        run: |
+          # Questo comando attiva il Desktop remoto per l'utente attuale senza cambiare password
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
+      - name: Avvio Tunnel
+        run: |
+          # Avvia il tunnel e lo tiene aperto
+          ngrok tcp 5900
