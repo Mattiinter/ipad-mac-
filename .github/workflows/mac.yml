@@ -9,5 +9,6 @@ jobs:
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
       - name: Avvio Tunnel Pinggy
         run: |
-          echo "Clicca sul link .pinggy.link che apparirà qui sotto tra pochi istanti:"
-          ssh -o StrictHostKeyChecking=no -p 443 R@a.pinggy.io
+          # Il comando 'sleep' serve a mantenere il tunnel aperto
+          ssh -o StrictHostKeyChecking=no -p 443 R@a.pinggy.io "sleep 21600"
+
