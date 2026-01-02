@@ -1,18 +1,11 @@
-name: Mac_iPad
+name: Mac_iPad_Free
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: Setup Ngrok
+      - name: Attiva Desktop Remoto
         run: |
-          brew install --cask ngrok
-          ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-      - name: Attiva VNC senza password
-        run: |
-          # Questo comando attiva il Desktop remoto per l'utente attuale senza cambiare password
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
-      - name: Avvio Tunnel
-        run: |
-          # Avvia il tunnel e lo tiene aperto
-          ngrok tcp 5900
+      - name: Avvio Tunnel Gratuito
+        uses: mxschmitt/action-tmate@v3
