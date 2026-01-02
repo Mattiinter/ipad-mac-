@@ -1,17 +1,25 @@
-name: Mac_iPad_Final
+name: Mac_iPad_Definitivo
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: Attiva Desktop
+      - name: 1. Attiva Desktop Remoto
         run: |
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
-      - name: Avvio Tunnel
+      
+      - name: 2. Genera Password per il Tunnel
         run: |
-          # Installiamo localtunnel
+          echo "------------------------------------------"
+          echo "LA TUA TUNNEL PASSWORD (IP) E':"
+          curl https://loca.lt/mytunnelpassword
+          echo ""
+          echo "------------------------------------------"
+
+      - name: 3. Avvio Localtunnel
+        run: |
           npm install -g localtunnel
-          # Avviamo il tunnel sulla porta 5900 (VNC)
-          # NOTA: apparirà un link 'url: https://xxxx.loca.lt'
+          # Avvio del tunnel sulla porta 5900 (VNC)
           lt --port 5900 &
+          # Mantiene il server acceso per 6 ore
           sleep 21600
