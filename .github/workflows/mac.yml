@@ -1,15 +1,18 @@
-name: Mac_iPad_VNC
+name: Mac_iPad_SOLUZIONE_FINALE
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Attiva Desktop
+      - name: 1. Imposta Password e Attiva Desktop
         run: |
+          # Imposta la password '1234' per l'utente runner
+          sudo dscl . -passwd /Users/runner 1234
+          # Attiva il servizio di Desktop Remoto
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
       
       - name: 2. Avvio Tunnel Bore
         run: |
           brew install bore-cli
-          # Crea un tunnel diretto per il VNC (porta 5900)
+          # Avvia il tunnel sulla porta del desktop remoto (5900)
           bore local 5900 --to bore.pub
