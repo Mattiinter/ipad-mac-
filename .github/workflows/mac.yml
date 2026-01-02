@@ -1,13 +1,17 @@
-name: Mac_iPad_Pinggy
+name: Mac_iPad_Final
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: Avvio Desktop Remoto
+      - name: Attiva Desktop
         run: |
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
-      - name: Avvio Tunnel Pinggy
+      - name: Avvio Tunnel
         run: |
-          # Avviamo il tunnel senza argomenti extra per evitare l'errore 255
-          ssh -o StrictHostKeyChecking=no -p 443 R@a.pinggy.io
+          # Installiamo localtunnel
+          npm install -g localtunnel
+          # Avviamo il tunnel sulla porta 5900 (VNC)
+          # NOTA: apparirà un link 'url: https://xxxx.loca.lt'
+          lt --port 5900 &
+          sleep 21600
