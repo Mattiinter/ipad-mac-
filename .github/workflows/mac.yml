@@ -1,11 +1,13 @@
-name: Mac_iPad_Free
+name: Mac_iPad_Pinggy
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: Attiva Desktop Remoto
+      - name: Avvio Desktop Remoto
         run: |
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
-      - name: Avvio Tunnel Gratuito
-        uses: mxschmitt/action-tmate@v3
+      - name: Avvio Tunnel Pinggy
+        run: |
+          echo "Clicca sul link .pinggy.link che apparirà qui sotto tra pochi istanti:"
+          ssh -o StrictHostKeyChecking=no -p 443 R@a.pinggy.io
