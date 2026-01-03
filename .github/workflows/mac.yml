@@ -1,21 +1,29 @@
-name: Mac_iPad_Nativo_Definitivo
+name: Mac_iPad_Final_Force
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente ipad e Password VNC
+      - name: 1. Setup Utente ipad
         run: |
-          # Crea utente ipad
           sudo dscl . -create /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
+
+      - name: 2. Installazione e Avvio Forzato VNC (No-Brew Path)
+        run: |
+          # Installiamo un server VNC alternativo tramite brew ma lo chiamiamo col percorso diretto
+          brew install x11vnc
           
-          # Imposta la password VNC nativa di Apple
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234
+          # Creiamo la password VNC
+          mkdir -p ~/.vnc
+          x11vnc -storepasswd 123456 ~/.vnc/passwd
           
-      - name: 2. Avvio Tunnel Bore (Sulla porta nativa 5900)
+          # Avviamo il server forzando l'ascolto su TUTTE le interfacce sulla porta 5900
+          # Questo risolve l'errore "could not connect to localhost:5900"
+          sudo x11vnc -auth guess -forever -loop -noxdamage -repeat -rfbauth ~/.vnc/passwd -rfbport 5900 -shared -bg
+
+      - name: 3. Avvio Tunnel Bore
         run: |
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
-          # Avviamo il tunnel sulla porta 5900 del Mac
           ./bore local 5900 --to bore.pub
