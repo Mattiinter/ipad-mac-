@@ -1,4 +1,4 @@
-name: Mac_iPad_TigerVNC_Universal_Link
+name: Mac_iPad_TigerVNC_Fixed_Path
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -10,14 +10,13 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
 
-      - name: 2. Installazione e Link TigerVNC
+      - name: 2. Installazione e Avvio TigerVNC
         run: |
-          # Installazione e forzatura del link dei binari
+          # Installazione pulita
           brew install tiger-vnc
-          brew link --overwrite tiger-vnc
           
-          # Carichiamo l'ambiente di Homebrew
-          eval "$(/opt/homebrew/bin/brew shellenv)"
+          # Aggiungiamo i binari al PATH della sessione corrente
+          export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
           
           # Configurazione password VNC (123456)
           mkdir -p ~/.vnc
