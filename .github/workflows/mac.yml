@@ -1,12 +1,12 @@
-name: Mac_iPad_Sblocco_Grafico
+name: Mac_iPad_Final_Fixed
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente e Forza Grafica
+      - name: 1. Setup Utente e Desktop
         run: |
-          # 1. Crea utente 'ipad' con password '1234'
+          # Crea l'utente 'ipad' con password '1234' in modo pulito
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
           sudo dscl . -create /Users/ipad RealName "iPad User"
@@ -16,15 +16,10 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # 2. COMANDO CRUCIALE: Forza la risoluzione video per attivare il desktop
-          sudo defaults write /Library/Preferences/com.apple.windowserver.plist DisplayResolutionEnabled -bool true
-          sudo defaults write /Library/Preferences/com.apple.RemoteManagement VNCAlwaysShowSafeSendMessage -bool VISIBLE
-          
-          # 3. Attiva Desktop Remoto
+          # Attiva il Desktop Remoto (VNC)
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
 
       - name: 2. Avvio Tunnel Bore
         run: |
           brew install bore-cli
-          # Avvia il tunnel sulla porta 5900
           bore local 5900 --to bore.pub
