@@ -1,22 +1,31 @@
-name: macOS_iPad_Native_Final
+name: Mac_iPad_Force_5900
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Attivazione VNC Ufficiale Apple
+      - name: 1. Installazione e Reset Porte
         run: |
-          # Creazione utente e password di sistema
-          sudo dscl . -create /Users/ipad
-          sudo dscl . -passwd /Users/ipad 1234
-          sudo dscl . -append /Groups/admin GroupMembership ipad
+          # Installiamo TigerVNC
+          brew install tiger-vnc
           
-          # Comando ufficiale Apple per attivare il VNC nativo sulla porta 5900
-          # Questo bypassa tutti i problemi di "command not found"
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
-
-      - name: 2. Avvio Tunnel Bore
+          # Pulizia forzata di eventuali socket rimasti appesi
+          sudo rm -rf /tmp/.X11-unix /tmp/.X*-lock ~/.vnc/*.log ~/.vnc/*.pid
+          
+          # Creazione password (123456)
+          mkdir -p ~/.vnc
+          printf "123456\n123456\nn\n" | /opt/homebrew/bin/vncpasswd
+          
+          # AVVIO FORZATO: Questo comando crea il "localhost:5900" che Bore cerca
+          # Usiamo il percorso assoluto di Homebrew per evitare "command not found"
+          /opt/homebrew/bin/vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800 -SecurityTypes VncAuth
+          
+      - name: 2. Verifica Porta (Log di controllo)
         run: |
-          # Scarichiamo Bore e lo forziamo a connettersi alla porta 5900 nativa
+          # Verifichiamo se c'è qualcosa in ascolto sulla 5900
+          netstat -an | grep 5900 || echo "ERRORE: La porta 5900 è ancora chiusa!"
+
+      - name: 3. Avvio Tunnel Bore
+        run: |
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
