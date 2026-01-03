@@ -1,27 +1,24 @@
-name: Mac_iPad_Password_1234
+name: Mac_iPad_Senza_Account
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente e Desktop Remoto
+      - name: 1. Setup Utente e Forza Video
         run: |
-          # Crea un nuovo utente 'ipad' con password '1234'
+          # Crea utente 'ipad' con password '1234'
           sudo dscl . -create /Users/ipad
-          sudo dscl . -create /Users/ipad UserShell /bin/bash
-          sudo dscl . -create /Users/ipad RealName "iPad User"
-          sudo dscl . -create /Users/ipad UniqueID "502"
-          sudo dscl . -create /Users/ipad PrimaryGroupID 20
-          sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Attiva il desktop remoto
+          # Forza la risoluzione per evitare lo schermo nero
+          sudo defaults write /Library/Preferences/com.apple.windowserver.plist DisplayResolutionEnabled -bool true
+          
+          # Attiva il Desktop Remoto
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
           
-      - name: 2. Avvio Tunnel Ngrok
+      - name: 2. Avvio Tunnel Gratuito (Cloudflare)
         run: |
-          brew install ngrok/ngrok/ngrok
-          # RICORDATI: Sostituisci 'IL_TUO_TOKEN' con quello che trovi su ngrok.com
-          ngrok config add-authtoken IL_TUO_TOKEN
-          ngrok tcp 5900
+          brew install cloudflared
+          # Crea un tunnel pubblico immediato sulla porta VNC 5900
+          cloudflared tunnel --url tcp://localhost:5900
