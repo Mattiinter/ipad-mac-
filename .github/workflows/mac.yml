@@ -1,4 +1,4 @@
-name: Mac_Sequoia_iPad_Ngrok_Final
+name: Mac_Sequoia_iPad_Localtonet
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -18,13 +18,14 @@ jobs:
           # Attivazione Screen Sharing originale Apple
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
           
-      - name: 2. Tunnel Ngrok con Authtoken
+      - name: 2. Avvio Tunnel Localtonet
         run: |
-          # Installazione ngrok
-          brew install ngrok/ngrok/ngrok
+          # Scarichiamo il client ufficiale per Mac ARM64
+          curl -L https://localtonet.com/download/localtonet-macos-arm64.zip -o localtonet.zip
+          unzip localtonet.zip
+          chmod +x localtonet
           
-          # Configurazione con il tuo token
-          ngrok config add-authtoken 37iPa7xYHkx6txNKSyL4MYZSybI_82EADUMqbHMe8Gf3rLp29
-          
-          # Avvio del tunnel TCP sulla porta 5900
-          ngrok tcp 5900
+          # Avviamo il tunnel in modalità anonima (gratis e senza carta)
+          # Il comando rimarrà attivo e mostrerà l'indirizzo nei log
+          ./localtonet authtoken anonymous
+          ./localtonet tcp --port 5900
