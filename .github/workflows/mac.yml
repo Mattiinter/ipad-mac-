@@ -1,4 +1,4 @@
-name: Mac_iPad_TigerVNC_Absolute_Fix
+name: Mac_iPad_TigerVNC_Final_Path
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -10,13 +10,14 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
 
-      - name: 2. Installazione e Avvio Forzato TigerVNC
+      - name: 2. Installazione e Avvio Dinamico TigerVNC
         run: |
           # Installazione TigerVNC
           brew install tiger-vnc
           
-          # Definiamo il percorso esatto per chip ARM (Sequoia)
-          VNC_BIN="/opt/homebrew/opt/tiger-vnc/bin"
+          # Cerchiamo il percorso esatto del binario appena installato
+          VNC_BIN=$(find /opt/homebrew/Cellar/tiger-vnc -name vncpasswd -parent)
+          echo "VNC Binaries found in: $VNC_BIN"
           
           # Configurazione password VNC (123456)
           mkdir -p ~/.vnc
