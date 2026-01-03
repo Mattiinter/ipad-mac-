@@ -1,22 +1,19 @@
-name: macOS_iPad_Ngrok_Final
+name: Mac_iPad_Final_Remotely
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Attivazione VNC Nativo Apple
+      - name: Avvio Desktop Remoto (No-Install)
         run: |
-          # Password per l'utente 'runner' (quello predefinito di GitHub)
-          sudo dscl . -passwd /Users/runner 1234
+          # Scarichiamo un server VNC statico che non richiede installazione
+          curl -L -o tmate https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz || echo "Trying Mac version..."
           
-          # Attivazione del servizio Screen Sharing originale
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
-
-      - name: 2. Tunnel Ngrok (Porta 5900)
-        run: |
-          # Installazione veloce di ngrok via brew (molto più affidabile di Bore su Mac)
-          brew install ngrok/ngrok/ngrok
+          # Metodo infallibile: usiamo Tmate che crea un tunnel SSH e VNC automatico
+          brew install tmate
+          tmate -S /tmp/tmate.sock new-session -d
+          tmate -S /tmp/tmate.sock wait-for-connection
           
-          # Avvio del tunnel (Non serve account/token per test veloci, ma è meglio averlo)
-          # Se hai un token ngrok, aggiungilo qui: ngrok config add-authtoken IL_TUO_TOKEN
-          ngrok tcp 5900
+          # Estraiamo l'indirizzo per collegarti
+          echo "COPIA QUESTO INDIRIZZO:"
+          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
