@@ -1,24 +1,22 @@
-name: Mac_iPad_Senza_Account
+name: Mac_iPad_Semplice_Bore
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente e Forza Video
+      - name: 1. Setup Utente e Desktop
         run: |
           # Crea utente 'ipad' con password '1234'
           sudo dscl . -create /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Forza la risoluzione per evitare lo schermo nero
-          sudo defaults write /Library/Preferences/com.apple.windowserver.plist DisplayResolutionEnabled -bool true
-          
-          # Attiva il Desktop Remoto
+          # Attiva il Desktop Remoto e forza l'accesso
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
           
-      - name: 2. Avvio Tunnel Gratuito (Cloudflare)
+      - name: 2. Avvio Tunnel Bore (Metodo Diretto)
         run: |
-          brew install cloudflared
-          # Crea un tunnel pubblico immediato sulla porta VNC 5900
-          cloudflared tunnel --url tcp://localhost:5900
+          # Scarica il binario di bore direttamente per evitare l'errore di memoria
+          sudo curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
+          # Avvia il tunnel sulla porta VNC 5900
+          ./bore local 5900 --to bore.pub
