@@ -1,24 +1,22 @@
-name: Mac_iPad_Final_V5
+name: Mac_iPad_Fix_V6
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Configura Utente e VNC
+      - name: 1. Forza Avvio VNC
         run: |
-          # Crea utente ipad con password 1234
+          # Crea utente ipad
           sudo dscl . -create /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Attiva VNC ignorando i blocchi grafici (kickstart pulito)
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -allowAccessFor -allUsers -privs -all
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -clientopts -setvncpasswd -vncpasswd 1234
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -restart -agent
-
+          # Configura e avvia VNC in un unico blocco solido
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
+          
       - name: 2. Avvio Tunnel Bore
         run: |
-          # Scarica il binario corretto per evitare errori di memoria
+          # Scarica il binario pulito
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
-          # Avvio del tunnel sulla porta 5900
+          # Avvia il tunnel sulla porta locale 5900
           ./bore local 5900 --to bore.pub
