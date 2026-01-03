@@ -1,32 +1,19 @@
-name: Mac_iPad_TigerVNC_Auto_Fix
+name: Mac_iPad_Docker_SOLVED
 on: workflow_dispatch
 jobs:
-  run-mac:
+  run-vnc:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente ipad
+      - name: 1. Avvio Desktop Linux (Senza Installazioni su Mac)
         run: |
-          sudo dscl . -create /Users/ipad
-          sudo dscl . -passwd /Users/ipad 1234
-          sudo dscl . -append /Groups/admin GroupMembership ipad
-
-      - name: 2. Installazione e Rilevamento Percorsi
-        run: |
-          # Installazione TigerVNC
-          brew install tiger-vnc
+          # Avviamo un contenitore con desktop grafico e VNC già pronto
+          # La password di accesso sarà 'vncpassword'
+          docker run -d -p 5900:5900 dorowu/ubuntu-desktop-lxde-vnc
           
-          # Troviamo dove brew ha messo i binari e aggiungiamoli forzatamente al sistema
-          VNC_HOME=$(brew --prefix tiger-vnc)
-          export PATH="$VNC_HOME/bin:$PATH"
+          # Aspettiamo che il sistema interno si carichi
+          sleep 20
           
-          # Configurazione password VNC (123456)
-          mkdir -p ~/.vnc
-          printf "123456\n123456\nn\n" | $VNC_HOME/bin/vncpasswd
-          
-          # Avvio del server forzando la porta 5900
-          $VNC_HOME/bin/vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
-          
-      - name: 3. Avvio Tunnel Bore
+      - name: 2. Avvio Tunnel Bore
         run: |
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
