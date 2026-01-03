@@ -1,24 +1,22 @@
-name: Mac_iPad_Final_Fixed
+name: Mac_iPad_No_Black_Screen
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente e Desktop
+      - name: 1. Setup Sistema e Forza Grafica
         run: |
-          # Crea l'utente 'ipad' con password '1234' in modo pulito
+          # Crea utente ipad
           sudo dscl . -create /Users/ipad
-          sudo dscl . -create /Users/ipad UserShell /bin/bash
-          sudo dscl . -create /Users/ipad RealName "iPad User"
-          sudo dscl . -create /Users/ipad UniqueID "502"
-          sudo dscl . -create /Users/ipad PrimaryGroupID 20
-          sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Attiva il Desktop Remoto (VNC)
+          # Forza l'attivazione della scrivania grafica
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
-
+          
+          # Comando per svegliare l'interfaccia grafica
+          sudo launchctl kickstart -kp system/com.apple.WindowServer
+      
       - name: 2. Avvio Tunnel Bore
         run: |
           brew install bore-cli
