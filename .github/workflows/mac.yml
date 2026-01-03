@@ -1,24 +1,23 @@
-name: Mac_iPad_Fix_Definitivo
+name: Mac_iPad_TigerVNC
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Sblocco Totale VNC
+      - name: 1. Installazione TigerVNC
         run: |
-          # Crea utente ipad
-          sudo dscl . -create /Users/ipad
-          sudo dscl . -passwd /Users/ipad 1234
-          sudo dscl . -append /Groups/admin GroupMembership ipad
+          # Installiamo un server VNC che non sia quello di Apple
+          brew install tigervnc
           
-          # Configura e forza l'attivazione immediata
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
+          # Impostiamo la password '1234' per TigerVNC
+          mkdir -p ~/.vnc
+          echo "123456" | vncpasswd -f > ~/.vnc/passwd
+          chmod 600 ~/.vnc/passwd
           
-          # Verifica che la porta 5900 sia effettivamente aperta
-          sudo lsof -iTCP:5900 -sTCP:LISTEN
+          # Avviamo il server sulla porta 5900
+          vncserver :0 -rfbport 5900 -localhost no -SecurityTypes VncAuth
           
       - name: 2. Avvio Tunnel Bore
         run: |
-          # Scarica il binario pulito per evitare l'integer overflow
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
