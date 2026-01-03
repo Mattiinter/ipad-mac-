@@ -1,20 +1,18 @@
-name: Mac_iPad_Deep_Fix
+name: Mac_iPad_Direct_V4
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Sblocco e Avvio VNC
+      - name: 1. Attiva Schermo e Password
         run: |
-          # Imposta password VNC '1234' e attiva tutto forzatamente
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
-          
-          # Verifica che il servizio sia effettivamente in ascolto sulla porta 5900
-          # Se non vedi nulla qui nei log, il Mac ha un blocco firewall
-          sudo lsof -iTCP:5900 -sTCP:LISTEN
+          # Metodo ultra-compatibile per attivare VNC senza mandare in crash kickstart
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -allowAccessFor -allUsers -privs -all
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -clientopts -setvncpasswd -vncpasswd 1234
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -restart -agent
           
       - name: 2. Avvio Tunnel Bore
         run: |
-          # Scarica il binario pulito per evitare l'errore integer overflow
+          # Installazione rapida per evitare errori di memoria
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
