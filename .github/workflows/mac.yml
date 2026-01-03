@@ -1,26 +1,25 @@
-name: Mac_iPad_NewUser_Solution
+name: Mac_Ventura_Fixed_iPad
 on: workflow_dispatch
 jobs:
   run-mac:
-    runs-on: macos-latest
+    runs-on: macos-13  # Usiamo Ventura invece di Sequoia (macos-latest)
     steps:
-      - name: 1. Creazione Utente Pippo (Senza errori password)
+      - name: 1. Creazione Utente e VNC Nativo
         run: |
-          # Creiamo un nuovo utente con password '123456'
-          # Usiamo UniqueID 601 per evitare conflitti con gli utenti di sistema
-          sudo dscl . -create /Users/pippo
-          sudo dscl . -create /Users/pippo UserShell /bin/bash
-          sudo dscl . -create /Users/pippo RealName "Pippo"
-          sudo dscl . -create /Users/pippo UniqueID "601"
-          sudo dscl . -create /Users/pippo PrimaryGroupID 20
-          sudo dscl . -create /Users/pippo NFSHomeDirectory /Users/pippo
-          sudo dscl . -passwd /Users/pippo 123456
-          sudo dscl . -append /Groups/admin GroupMembership pippo
-          
-          # Attivazione VNC nativo Apple per l'utente pippo
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 123456 -restart -agent -privs -all
+          # Creiamo l'utente 'ipad' con password '1234'
+          sudo dscl . -create /Users/ipad
+          sudo dscl . -create /Users/ipad UserShell /bin/bash
+          sudo dscl . -create /Users/ipad UniqueID "601"
+          sudo dscl . -create /Users/ipad PrimaryGroupID 20
+          sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
+          sudo dscl . -passwd /Users/ipad 1234
+          sudo dscl . -append /Groups/admin GroupMembership ipad
 
-      - name: 2. Avvio Tunnel con Bore (Porta 5900)
+          # Attivazione VNC nativo Apple (Su Ventura funziona senza blocchi)
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
+
+      - name: 2. Avvio Tunnel Bore
         run: |
+          # Scarica Bore per Mac Intel (Ventura usa ancora architettura Intel/Rosetta)
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
