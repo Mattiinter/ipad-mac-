@@ -1,4 +1,4 @@
-name: Mac_iPad_TigerVNC_Final_V3
+name: Mac_iPad_TigerVNC_Universal
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -6,6 +6,7 @@ jobs:
     steps:
       - name: 1. Setup Utente ipad
         run: |
+          # Creazione utente ipad
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
           sudo dscl . -create /Users/ipad UniqueID "502"
@@ -16,16 +17,19 @@ jobs:
 
       - name: 2. Installazione e Avvio TigerVNC
         run: |
-          # Installazione pulita
+          # Installazione TigerVNC
           brew install tiger-vnc
           
-          # Troviamo il percorso corretto dinamicamente ed eseguiamo la configurazione
-          VNC_PATH=$(brew --prefix tiger-vnc)/bin
+          # Aggiungiamo i binari di Homebrew al PATH di sistema
+          export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+          
+          # Configurazione password VNC (123456)
           mkdir -p ~/.vnc
-          printf "123456\n123456\nn\n" | $VNC_PATH/vncpasswd
+          printf "123456\n123456\nn\n" | vncpasswd
           
           # Avvio del server forzando la porta 5900
-          $VNC_PATH/vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
+          # Questo risolve l'errore "connection exited with error" di Bore
+          vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
           
       - name: 3. Avvio Tunnel Bore
         run: |
