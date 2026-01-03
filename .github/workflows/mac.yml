@@ -1,11 +1,12 @@
-name: Mac_iPad_Final_Step
+name: Mac_Sequoia_Cloudflare_Final
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente e VNC
+      - name: 1. Setup Utente e VNC Nativo
         run: |
+          # Creazione utente 'ipad' con password '1234'
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
           sudo dscl . -create /Users/ipad UniqueID "601"
@@ -13,14 +14,12 @@ jobs:
           sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
+
+          # Attivazione Screen Sharing originale Apple
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
           
-      - name: 2. Avvio Tunnel Localtonet
+      - name: 2. Avvio Tunnel Cloudflare (TCP)
         run: |
-          # Download forzato con gestione errori
-          curl -L "https://localtonet.com/download/localtonet-macos-arm64" -o localtonet
-          chmod +x localtonet
-          # Avvio anonimo
-          ./localtonet authtoken anonymous &
-          sleep 5
-          ./localtonet tcp --port 5900
+          brew install cloudflared
+          # Questo comando genera un link temporaneo .trycloudflare.com
+          cloudflared tunnel --url tcp://localhost:5900
