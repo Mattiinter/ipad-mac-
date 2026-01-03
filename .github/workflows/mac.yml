@@ -1,12 +1,22 @@
-name: Mac_iPad_Direct_V4
+name: Mac_iPad_Final_IpadUser
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Attiva Schermo e Password
+      - name: 1. Setup Utente ipad e VNC
         run: |
-          # Metodo ultra-compatibile per attivare VNC senza mandare in crash kickstart
+          # Crea utente 'ipad' con password '1234'
+          sudo dscl . -create /Users/ipad
+          sudo dscl . -create /Users/ipad UserShell /bin/bash
+          sudo dscl . -create /Users/ipad RealName "iPad User"
+          sudo dscl . -create /Users/ipad UniqueID "502"
+          sudo dscl . -create /Users/ipad PrimaryGroupID 20
+          sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
+          sudo dscl . -passwd /Users/ipad 1234
+          sudo dscl . -append /Groups/admin GroupMembership ipad
+          
+          # Configura VNC per accettare SIA l'utente 'ipad' SIA la password diretta '1234'
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -allowAccessFor -allUsers -privs -all
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -clientopts -setvncpasswd -vncpasswd 1234
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -restart -agent
