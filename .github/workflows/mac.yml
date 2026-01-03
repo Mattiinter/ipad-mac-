@@ -1,14 +1,24 @@
-name: Mac_iPad_Finale
+name: Mac_iPad_Soluzione_Finale
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Avvio Desktop Remoto
+      - name: 1. Setup Utente e Grafica
         run: |
-          # Attiva il desktop remoto senza cambiare password (usa quella di default)
+          # Crea un utente 'ipad' con password '1234' saltando i vecchi permessi
+          sudo dscl . -create /Users/ipad
+          sudo dscl . -create /Users/ipad UserShell /bin/bash
+          sudo dscl . -create /Users/ipad RealName "iPad User"
+          sudo dscl . -create /Users/ipad UniqueID "502"
+          sudo dscl . -create /Users/ipad PrimaryGroupID 20
+          sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
+          sudo dscl . -passwd /Users/ipad 1234
+          sudo dscl . -append /Groups/admin GroupMembership ipad
+          
+          # Attiva il desktop remoto
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
-      
+
       - name: 2. Avvio Tunnel Bore
         run: |
           brew install bore-cli
