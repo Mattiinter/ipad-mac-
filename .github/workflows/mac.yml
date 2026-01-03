@@ -1,37 +1,21 @@
-name: Mac_iPad_TightVNC_User
+name: Mac_iPad_Nativo_Definitivo
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente ipad
+      - name: 1. Setup Utente ipad e Password VNC
         run: |
-          # Creazione utente ipad
+          # Crea utente ipad
           sudo dscl . -create /Users/ipad
-          sudo dscl . -create /Users/ipad UserShell /bin/bash
-          sudo dscl . -create /Users/ipad UniqueID "502"
-          sudo dscl . -create /Users/ipad PrimaryGroupID 20
-          sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
-
-      - name: 2. Installazione e Avvio TightVNC
+          
+          # Imposta la password VNC nativa di Apple
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234
+          
+      - name: 2. Avvio Tunnel Bore (Sulla porta nativa 5900)
         run: |
-          # Installiamo TightVNC (alternativa a Tiger)
-          brew install tightvnc
-          
-          # Creazione password VNC (123456)
-          # Usiamo un metodo che non dipende dai percorsi variabili di brew
-          mkdir -p ~/.vnc
-          echo "123456" | vncpasswd -f > ~/.vnc/passwd
-          chmod 600 ~/.vnc/passwd
-          
-          # Avvio del server forzando l'ascolto sulla porta 5900
-          # Questo elimina l'errore "could not connect to localhost"
-          vncserver :1 -rfbport 5900 -localhost no
-          
-      - name: 3. Avvio Tunnel Bore
-        run: |
-          # Scarica e avvia Bore per collegare l'iPad
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
+          # Avviamo il tunnel sulla porta 5900 del Mac
           ./bore local 5900 --to bore.pub
