@@ -1,12 +1,12 @@
-name: Mac_iPad_Funzionante
+name: Mac_iPad_Definitivo_Funzionante
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Creazione Utente e Attivazione Desktop
+      - name: 1. Configurazione Sistema e Grafica
         run: |
-          # Crea un nuovo utente 'ipad' con password '1234'
+          # Creazione utente ipad con password 1234
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
           sudo dscl . -create /Users/ipad RealName "iPad User"
@@ -16,11 +16,15 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Attiva il desktop remoto per tutti gli utenti
+          # Forzatura interfaccia grafica (evita lo schermo a scacchi)
+          sudo defaults write /Library/Preferences/com.apple.windowserver.plist DisplayResolutionEnabled -bool true
+          sudo defaults write /Library/Preferences/com.apple.RemoteManagement VNCAlwaysShowSafeSendMessage -bool VISIBLE
+          
+          # Attivazione Desktop Remoto
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
 
       - name: 2. Avvio Tunnel Bore
         run: |
           brew install bore-cli
-          # Avvia il tunnel sulla porta 5900
+          # Il tunnel punta alla porta 5900 del VNC
           bore local 5900 --to bore.pub
