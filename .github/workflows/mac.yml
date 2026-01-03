@@ -1,31 +1,22 @@
-name: Mac_iPad_Force_5900
+name: macOS_iPad_Ngrok_Final
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Installazione e Reset Porte
+      - name: 1. Attivazione VNC Nativo Apple
         run: |
-          # Installiamo TigerVNC
-          brew install tiger-vnc
+          # Password per l'utente 'runner' (quello predefinito di GitHub)
+          sudo dscl . -passwd /Users/runner 1234
           
-          # Pulizia forzata di eventuali socket rimasti appesi
-          sudo rm -rf /tmp/.X11-unix /tmp/.X*-lock ~/.vnc/*.log ~/.vnc/*.pid
-          
-          # Creazione password (123456)
-          mkdir -p ~/.vnc
-          printf "123456\n123456\nn\n" | /opt/homebrew/bin/vncpasswd
-          
-          # AVVIO FORZATO: Questo comando crea il "localhost:5900" che Bore cerca
-          # Usiamo il percorso assoluto di Homebrew per evitare "command not found"
-          /opt/homebrew/bin/vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800 -SecurityTypes VncAuth
-          
-      - name: 2. Verifica Porta (Log di controllo)
-        run: |
-          # Verifichiamo se c'è qualcosa in ascolto sulla 5900
-          netstat -an | grep 5900 || echo "ERRORE: La porta 5900 è ancora chiusa!"
+          # Attivazione del servizio Screen Sharing originale
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
 
-      - name: 3. Avvio Tunnel Bore
+      - name: 2. Tunnel Ngrok (Porta 5900)
         run: |
-          curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
-          ./bore local 5900 --to bore.pub
+          # Installazione veloce di ngrok via brew (molto più affidabile di Bore su Mac)
+          brew install ngrok/ngrok/ngrok
+          
+          # Avvio del tunnel (Non serve account/token per test veloci, ma è meglio averlo)
+          # Se hai un token ngrok, aggiungilo qui: ngrok config add-authtoken IL_TUO_TOKEN
+          ngrok tcp 5900
