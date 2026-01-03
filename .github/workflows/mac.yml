@@ -1,12 +1,12 @@
-name: Mac_Sequoia_Final_iPad
+name: Mac_Sequoia_iPad_Ngrok_Final
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Sblocco Sicurezza Sequoia e VNC
+      - name: 1. Setup Utente e VNC Nativo
         run: |
-          # Creiamo un nuovo utente 'ipad' (evitiamo l'utente runner protetto)
+          # Creiamo l'utente 'ipad' con password '1234'
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
           sudo dscl . -create /Users/ipad UniqueID "601"
@@ -15,18 +15,16 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
 
-          # Attivazione VNC Nativo con permessi forzati per macOS 15
+          # Attivazione Screen Sharing originale Apple
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
           
-      - name: 2. Tunnel Ngrok (Molto più stabile di Bore su Sequoia)
+      - name: 2. Tunnel Ngrok con Authtoken
         run: |
-          # Installiamo ngrok
+          # Installazione ngrok
           brew install ngrok/ngrok/ngrok
           
-          # NOTA: Per usare ngrok devi aggiungere il tuo token gratuito qui sotto.
-          # Vai su ngrok.com, registrati e prendi il token (è gratis).
-          # Sostituisci 'IL_TUO_TOKEN_QUI' con quello vero.
-          ngrok config add-authtoken IL_TUO_TOKEN_QUI
+          # Configurazione con il tuo token
+          ngrok config add-authtoken 37iPa7xYHkx6txNKSyL4MYZSybI_82EADUMqbHMe8Gf3rLp29
           
-          # Avviamo il tunnel sulla porta 5900
+          # Avvio del tunnel TCP sulla porta 5900
           ngrok tcp 5900
