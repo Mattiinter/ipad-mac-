@@ -1,19 +1,22 @@
-name: Mac_iPad_Docker_SOLVED
+name: Mac_iPad_Final_Hope
 on: workflow_dispatch
 jobs:
-  run-vnc:
+  run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Avvio Desktop Linux (Senza Installazioni su Mac)
+      - name: 1. Attivazione VNC Nativo
         run: |
-          # Avviamo un contenitore con desktop grafico e VNC già pronto
-          # La password di accesso sarà 'vncpassword'
-          docker run -d -p 5900:5900 dorowu/ubuntu-desktop-lxde-vnc
+          # Crea utente ipad con password 1234
+          sudo dscl . -create /Users/ipad
+          sudo dscl . -passwd /Users/ipad 1234
+          sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Aspettiamo che il sistema interno si carichi
-          sleep 20
-          
+          # Comandi nativi Apple per forzare l'attivazione (senza installare nulla)
+          # Questi file ESISTONO in ogni Mac, non possono dare 'command not found'
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
+
       - name: 2. Avvio Tunnel Bore
         run: |
+          # Scarica bore e lo avvia direttamente
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
