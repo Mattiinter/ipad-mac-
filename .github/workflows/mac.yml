@@ -1,4 +1,4 @@
-name: Mac_iPad_TigerVNC_User
+name: Mac_iPad_TigerVNC_User_V2
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -9,27 +9,25 @@ jobs:
           # Crea l'utente ipad con password 1234
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
+          sudo dscl . -create /Users/ipad RealName "iPad User"
           sudo dscl . -create /Users/ipad UniqueID "502"
           sudo dscl . -create /Users/ipad PrimaryGroupID 20
           sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
 
-      - name: 2. Installazione TigerVNC (Corretta)
+      - name: 2. Installazione TigerVNC e Avvio Server
         run: |
-          # Usiamo --cask per evitare l'errore "No available formula"
-          brew install --cask tigervnc-viewer
-          # Installiamo il server tramite un binario diretto se la formula brew fallisce
-          brew install tightvnc || true 
+          # Installazione corretta di TigerVNC
+          brew install tiger-vnc
           
-          # Configura la password di TigerVNC (almeno 6 caratteri)
+          # Creazione password per VNC (almeno 6 caratteri: 123456)
           mkdir -p ~/.vnc
-          echo "123456" | vncpasswd -f > ~/.vnc/passwd
-          chmod 600 ~/.vnc/passwd
+          printf "123456\n123456\nn\n" | vncpasswd
           
-          # Avvia il server VNC sulla porta 5900 ignorando i blocchi di Apple
-          # Questo risolve l'errore "could not connect to localhost:5900"
-          sudo /Library/Desktop\ Next/TigerVNC\ Server.app/Contents/MacOS/vncserver :0 -rfbport 5900 -localhost no &
+          # Avvio del server TigerVNC sulla porta 5900
+          # Ignoriamo i blocchi di Apple sulla registrazione schermo
+          vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
           
       - name: 3. Avvio Tunnel Bore
         run: |
