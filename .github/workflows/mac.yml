@@ -1,4 +1,4 @@
-name: Mac_iPad_TigerVNC_Final_Hardcoded
+name: Mac_iPad_TigerVNC_Universal_Link
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -10,19 +10,21 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
 
-      - name: 2. Avvio TigerVNC (Percorso Diretto)
+      - name: 2. Installazione e Link TigerVNC
         run: |
+          # Installazione e forzatura del link dei binari
           brew install tiger-vnc
+          brew link --overwrite tiger-vnc
           
-          # Percorso estratto direttamente dai tuoi log
-          VNC_BIN="/opt/homebrew/Cellar/tiger-vnc/1.15.0/bin"
+          # Carichiamo l'ambiente di Homebrew
+          eval "$(/opt/homebrew/bin/brew shellenv)"
           
           # Configurazione password VNC (123456)
           mkdir -p ~/.vnc
-          printf "123456\n123456\nn\n" | $VNC_BIN/vncpasswd
+          printf "123456\n123456\nn\n" | vncpasswd
           
-          # Avvio server sulla porta 5900
-          $VNC_BIN/vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
+          # Avvio del server forzando la porta 5900
+          vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
           
       - name: 3. Avvio Tunnel Bore
         run: |
