@@ -1,4 +1,4 @@
-name: Mac_Sequoia_Cloudflare_Final
+name: Mac_Sequoia_Cloudflare_TCP
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -18,8 +18,8 @@ jobs:
           # Attivazione Screen Sharing originale Apple
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
           
-      - name: 2. Avvio Tunnel Cloudflare (TCP)
+      - name: 2. Avvio Tunnel Cloudflare (Puro TCP)
         run: |
           brew install cloudflared
-          # Questo comando genera un link temporaneo .trycloudflare.com
+          # La modifica fondamentale è qui: forziamo il protocollo TCP
           cloudflared tunnel --url tcp://localhost:5900
