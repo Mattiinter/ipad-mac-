@@ -1,27 +1,25 @@
-name: Mac_iPad_No_Database_Error
+name: Mac_iPad_AutoLogin
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Utente ipad e Sblocco Grafica
+      - name: 1. Setup Sistema e Auto-Login
         run: |
-          # Crea utente ipad
+          # Crea utente ipad con password 1234
           sudo dscl . -create /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Reset e sblocco permessi senza usare sqlite3 (evita errori di colonne)
-          sudo tccutil reset ScreenCapture
-          sudo tccutil reset Accessibility
-          
-          # Attiva VNC con password diretta '1234'
+          # Attiva VNC in modalità compatibile
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -allowAccessFor -allUsers -privs -all
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -clientopts -setvncpasswd -vncpasswd 1234
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -restart -agent
-
+          
+          # FORZA il caricamento dell'interfaccia grafica
+          sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.WindowServer.plist
+          
       - name: 2. Avvio Tunnel Bore
         run: |
-          # Scarica il binario per evitare l'errore 'integer overflow' di brew
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
