@@ -1,21 +1,16 @@
-name: Mac_iPad_Sblocco_Totale
+name: Mac_iPad_Direct
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Sistema
+      - name: 1. Attiva VNC di Sistema
         run: |
-          # Crea utente ipad con password 1234
-          sudo dscl . -create /Users/ipad
-          sudo dscl . -passwd /Users/ipad 1234
-          sudo dscl . -append /Groups/admin GroupMembership ipad
+          # Impostiamo la password '1234' direttamente sul servizio VNC senza creare utenti
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
           
-          # Attiva VNC ignorando gli errori di Screen Recording
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -restart -agent -privs -all -allowAccessFor -allUsers
-          
-      - name: 2. Avvio Tunnel Diretto
+      - name: 2. Avvio Tunnel Bore
         run: |
-          # Scarica bore e avvialo in un colpo solo per evitare timeout
+          # Scarichiamo il binario pre-compilato per evitare errori di 'brew'
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
