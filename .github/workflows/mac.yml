@@ -1,19 +1,26 @@
-name: Mac_iPad_Final_Remotely
+name: Mac_iPad_NewUser_Solution
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: Avvio Desktop Remoto (No-Install)
+      - name: 1. Creazione Utente Pippo (Senza errori password)
         run: |
-          # Scarichiamo un server VNC statico che non richiede installazione
-          curl -L -o tmate https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz || echo "Trying Mac version..."
+          # Creiamo un nuovo utente con password '123456'
+          # Usiamo UniqueID 601 per evitare conflitti con gli utenti di sistema
+          sudo dscl . -create /Users/pippo
+          sudo dscl . -create /Users/pippo UserShell /bin/bash
+          sudo dscl . -create /Users/pippo RealName "Pippo"
+          sudo dscl . -create /Users/pippo UniqueID "601"
+          sudo dscl . -create /Users/pippo PrimaryGroupID 20
+          sudo dscl . -create /Users/pippo NFSHomeDirectory /Users/pippo
+          sudo dscl . -passwd /Users/pippo 123456
+          sudo dscl . -append /Groups/admin GroupMembership pippo
           
-          # Metodo infallibile: usiamo Tmate che crea un tunnel SSH e VNC automatico
-          brew install tmate
-          tmate -S /tmp/tmate.sock new-session -d
-          tmate -S /tmp/tmate.sock wait-for-connection
-          
-          # Estraiamo l'indirizzo per collegarti
-          echo "COPIA QUESTO INDIRIZZO:"
-          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
+          # Attivazione VNC nativo Apple per l'utente pippo
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 123456 -restart -agent -privs -all
+
+      - name: 2. Avvio Tunnel con Bore (Porta 5900)
+        run: |
+          curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
+          ./bore local 5900 --to bore.pub
