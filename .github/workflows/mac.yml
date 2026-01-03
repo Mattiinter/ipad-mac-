@@ -1,4 +1,4 @@
-name: Mac_iPad_TigerVNC_Final_Fix
+name: Mac_iPad_TigerVNC_Absolute_Fix
 on: workflow_dispatch
 jobs:
   run-mac:
@@ -7,27 +7,23 @@ jobs:
       - name: 1. Setup Utente ipad
         run: |
           sudo dscl . -create /Users/ipad
-          sudo dscl . -create /Users/ipad UserShell /bin/bash
-          sudo dscl . -create /Users/ipad UniqueID "502"
-          sudo dscl . -create /Users/ipad PrimaryGroupID 20
-          sudo dscl . -create /Users/ipad NFSHomeDirectory /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
 
-      - name: 2. Installazione e Avvio TigerVNC
+      - name: 2. Installazione e Avvio Forzato TigerVNC
         run: |
           # Installazione TigerVNC
           brew install tiger-vnc
           
-          # Carichiamo Homebrew nel PATH (fondamentale per Sequoia)
-          eval "$(/opt/homebrew/bin/brew shellenv)"
+          # Definiamo il percorso esatto per chip ARM (Sequoia)
+          VNC_BIN="/opt/homebrew/opt/tiger-vnc/bin"
           
           # Configurazione password VNC (123456)
           mkdir -p ~/.vnc
-          printf "123456\n123456\nn\n" | vncpasswd
+          printf "123456\n123456\nn\n" | $VNC_BIN/vncpasswd
           
           # Avvio del server forzando la porta 5900
-          vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
+          $VNC_BIN/vncserver :1 -rfbport 5900 -localhost no -geometry 1280x800
           
       - name: 3. Avvio Tunnel Bore
         run: |
