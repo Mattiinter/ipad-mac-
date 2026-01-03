@@ -1,12 +1,12 @@
-name: Mac_Ventura_Fixed_iPad
+name: Mac_Sequoia_Final_iPad
 on: workflow_dispatch
 jobs:
   run-mac:
-    runs-on: macos-13  # Usiamo Ventura invece di Sequoia (macos-latest)
+    runs-on: macos-latest
     steps:
-      - name: 1. Creazione Utente e VNC Nativo
+      - name: 1. Sblocco Sicurezza Sequoia e VNC
         run: |
-          # Creiamo l'utente 'ipad' con password '1234'
+          # Creiamo un nuovo utente 'ipad' (evitiamo l'utente runner protetto)
           sudo dscl . -create /Users/ipad
           sudo dscl . -create /Users/ipad UserShell /bin/bash
           sudo dscl . -create /Users/ipad UniqueID "601"
@@ -15,11 +15,18 @@ jobs:
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
 
-          # Attivazione VNC nativo Apple (Su Ventura funziona senza blocchi)
+          # Attivazione VNC Nativo con permessi forzati per macOS 15
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
-
-      - name: 2. Avvio Tunnel Bore
+          
+      - name: 2. Tunnel Ngrok (Molto più stabile di Bore su Sequoia)
         run: |
-          # Scarica Bore per Mac Intel (Ventura usa ancora architettura Intel/Rosetta)
-          curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
-          ./bore local 5900 --to bore.pub
+          # Installiamo ngrok
+          brew install ngrok/ngrok/ngrok
+          
+          # NOTA: Per usare ngrok devi aggiungere il tuo token gratuito qui sotto.
+          # Vai su ngrok.com, registrati e prendi il token (è gratis).
+          # Sostituisci 'IL_TUO_TOKEN_QUI' con quello vero.
+          ngrok config add-authtoken IL_TUO_TOKEN_QUI
+          
+          # Avviamo il tunnel sulla porta 5900
+          ngrok tcp 5900
