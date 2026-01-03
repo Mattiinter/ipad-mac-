@@ -1,25 +1,25 @@
-name: Mac_iPad_AutoLogin
+name: Mac_iPad_Final_Force
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Setup Sistema e Auto-Login
+      - name: 1. Sblocco Firewall e Utente ipad
         run: |
-          # Crea utente ipad con password 1234
+          # Crea utente ipad
           sudo dscl . -create /Users/ipad
           sudo dscl . -passwd /Users/ipad 1234
           sudo dscl . -append /Groups/admin GroupMembership ipad
           
-          # Attiva VNC in modalità compatibile
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -allowAccessFor -allUsers -privs -all
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -configure -clientopts -setvncpasswd -vncpasswd 1234
-          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -restart -agent
+          # Disattiva completamente il firewall di macOS per evitare il blocco "Connecting"
+          sudo /usr/libexec/ApplicationFirewall/socketfilterproxy --shutdown
           
-          # FORZA il caricamento dell'interfaccia grafica
-          sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.WindowServer.plist
+          # Avvia VNC con password '1234'
+          sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
           
       - name: 2. Avvio Tunnel Bore
         run: |
+          # Scarica il binario per evitare l'errore 'integer overflow'
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
+          # Avvia il tunnel forzando la connessione locale
           ./bore local 5900 --to bore.pub
