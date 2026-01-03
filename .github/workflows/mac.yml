@@ -1,17 +1,20 @@
-name: Mac_iPad_Final_Solution
+name: Mac_iPad_Deep_Fix
 on: workflow_dispatch
 jobs:
   run-mac:
     runs-on: macos-latest
     steps:
-      - name: 1. Configura Password VNC Diretta
+      - name: 1. Sblocco e Avvio VNC
         run: |
-          # Imposta '1234' come password globale del servizio VNC
-          # Questo evita di dover creare nuovi utenti o cambiare password di sistema
+          # Imposta password VNC '1234' e attiva tutto forzatamente
           sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -clientopts -setvncpasswd -vncpasswd 1234 -restart -agent -privs -all
           
-      - name: 2. Avvio Tunnel Bore (Versione Leggera)
+          # Verifica che il servizio sia effettivamente in ascolto sulla porta 5900
+          # Se non vedi nulla qui nei log, il Mac ha un blocco firewall
+          sudo lsof -iTCP:5900 -sTCP:LISTEN
+          
+      - name: 2. Avvio Tunnel Bore
         run: |
-          # Scarica il binario direttamente per evitare l'errore 'malloc' di memoria
+          # Scarica il binario pulito per evitare l'errore integer overflow
           curl -L https://github.com/ekzhang/bore/releases/download/v0.5.1/bore-v0.5.1-x86_64-apple-darwin.tar.gz | tar -xz
           ./bore local 5900 --to bore.pub
